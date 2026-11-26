@@ -1,0 +1,17 @@
+# 本地连接远程库的配置样例
+#
+# 用法
+#   cp src/main/resources/application-local.yml.example src/main/resources/application-local.yml
+#   然后改成本机可用的地址,启动时加 --spring.profiles.active=local
+#
+# application-local.yml 已被 gitignore,不要提交真实地址与口令
+
+spring:
+  datasource:
+    url: jdbc:mysql://10.208.75.1:3306/edda?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: edda
+    password: edda
+    hikari:
+      # 跨机器连接时把超时压短,避免网络抖动时线程被长时间占住
+      connection-timeout: 3000
+      maximum-pool-size: 5

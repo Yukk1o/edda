@@ -1,0 +1,43 @@
+# 本地依赖：只有一个 MySQL
+#
+# 这是"没有现成数据库服务器"时的备选方案
+# 如果已经有可用的 MySQL,直接看 application-local.yml.example,不需要这个文件
+#
+# 为什么只有它：MySQL 是主存储,属于没有它就跑不起来的必需品
+# 缓存,消息队列,搜索引擎都还没到准入条件,见 docs/decisions/0006-组件准入.md
+#
+# 用法：
+#   docker compose up -d
+#   docker compose down        # 保留数据
+#   docker compose down -v     # 连数据一起删
+
+services:
+  mysql:
+    # 用 MariaDB 11.4 而不是 MySQL 8.x
+    # 原因:当前网络下 mysql 镜像有一个大层在多个加速站都拉不动,mariadb 一次通过
+    # 两者协议与驱动兼容,本项目未使用 MySQL 专有特性
+    # 换回 MySQL 时只需改 image 与本段环境变量,SQL 无需改动(已避开 0900 排序规则)
+    image: mariadb:11.4
+    container_name: edda-mysql
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: edda
+      MARIADB_USER: edda
+      MARIADB_PASSWORD: edda
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      # 让时间字段默认按东八区解释,避免本地与线上差 8 小时这种经典问题
+      - --default-time-zone=+08:00
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  mysqldata:

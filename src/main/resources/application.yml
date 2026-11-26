@@ -1,0 +1,61 @@
+server:
+  port: 8080
+  shutdown: graceful
+
+spring:
+  application:
+    name: edda
+  datasource:
+    # 连接信息全部走环境变量,默认值只用于本机 compose
+    # 用远程库时启用 local profile,见 application-local.yml.example
+    url: jdbc:mysql://${DB_HOST:127.0.0.1}:${DB_PORT:3306}/${DB_NAME:edda}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USER:edda}
+    password: ${DB_PASSWORD:edda}
+    hikari:
+      maximum-pool-size: 10
+      # 拿不到连接时最多等 3 秒，不要无限等
+      connection-timeout: 3000
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+mybatis-plus:
+  configuration:
+    # 库里用 snake_case,实体用 camelCase,统一在这里转换
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      # 主键由应用生成(雪花),库里是 bigint 无自增,与既有项目保持一致
+      id-type: assign_id
+      # 逻辑删除字段统一 is_deleted
+      logic-delete-field: isDeleted
+      logic-not-delete-value: 0
+      logic-delete-value: 1
+
+sa-token:
+  # 请求头名,前端按这个带 token
+  token-name: Authorization
+  # 7 天绝对过期
+  timeout: 604800
+  # 30 分钟无操作过期,避免长期挂着
+  active-timeout: 1800
+  # 单端登录,新登录踢掉旧登录,防止一个账号多人共用
+  is-concurrent: false
+  is-share: false
+  token-style: uuid
+  is-log: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  pattern:
+    # %X{requestId} 是排障地基：一次请求的所有日志都能被同一个 id 串起来
+    console: "%d{HH:mm:ss.SSS} %-5level [%X{requestId:-}] %logger{36} - %msg%n"
+  level:
+    com.edda: debug

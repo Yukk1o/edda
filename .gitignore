@@ -1,0 +1,10 @@
+target/
+*.iml
+.idea/
+.vscode/
+*.log
+logs/
+.env
+.DS_Store
+# 本地连接配置,含内网地址与口令,不进仓库
+application-local.yml
