@@ -23,6 +23,7 @@
         <mybatis-plus.version>3.5.18.1</mybatis-plus.version>
         <sa-token.version>1.46.0</sa-token.version>
         <bcprov.version>1.87</bcprov.version>
+        <sms4j.version>3.3.5</sms4j.version>
     </properties>
 
     <dependencies>
@@ -101,6 +102,13 @@
             <artifactId>archunit-junit5</artifactId>
             <version>${archunit.version}</version>
             <scope>test</scope>
+        </dependency>
+
+        <!-- sms4j短信服务 -->
+        <dependency>
+            <groupId>org.dromara.sms4j</groupId>
+            <artifactId>sms4j-spring-boot-starter</artifactId>
+            <version>${sms4j.version}</version>
         </dependency>
     </dependencies>
 
